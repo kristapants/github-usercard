@@ -1,60 +1,80 @@
-/*
-  STEP 1: using axios, send a GET request to the following URL
-    (replacing the placeholder with your Github name):
-    https://api.github.com/users/<your name>
-*/
+import axios from 'axios'
 
-/*
-  STEP 2: Inspect and study the data coming back, this is YOUR
-    github info! You will need to understand the structure of this
-    data in order to use it to build your component function
+//gets my information and list of friends, invokes creating my card and invokes creating friend cards with information from a callback
+axios.get('https://api.github.com/users/kristapants')
+  .then(apiData => { //apiData now refers to the JSON stuff in the get ask. 
+    cardMaker(apiData.data) 
+    const {followers_url} = apiData.data; //destructoring of this object. Extracting followers_url from apiData.data so that entering followers_url is already known to be from api.data.data
+    axios.get(followers_url) //making a new http request to get the followers list.
+      .then(friendList => { //follower list is now known at friendList
+        addFriends(friendList.data) //invokes addfriends function that makes friend cards using the data in friendList 
+      })
+      .catch(err => { //why bother
+        console.log(err)
+      })
+  })
+  .catch(err => { //big boss bother
+    console.log(err)
+  })
 
-    Skip to STEP 3.
-*/
+//callback invoked above. collects information on each of my followers
+const addFriends = (friendList) => { //declaring a function called addFriends that takes an array of objects argument
+  friendList.forEach( ( {login} ) => {// for each on the array of objects but it's just acting on the login key value from each object in the array.
+    axios.get(`https://api.github.com/users/${login}`) //new http get using the usernames from the friendlist array. since login was all that was pulled from the object, it doesn't need to be further specified
+      .then(singleFriendData => { //the single friends userdata is now called singleFriendData
+        cardMaker(singleFriendData.data) //run the information stored in singleFriendData.data through cardmaker.
+      })
+      .catch(err => { //whyyyyy
+        console.log(err)
+      })
+  })
+}
 
-/*
-  STEP 4: Pass the data received from Github into your function,
-    and append the returned markup to the DOM as a child of .cards
-*/
+//Defines the container for all cards to have children appended to it. 
+const cardBox = document.querySelector('.cards') //the div that all the user cards need to go into
 
-/*
-  STEP 5: Now that you have your own card getting added to the DOM, either
-    follow this link in your browser https://api.github.com/users/<Your github name>/followers,
-    manually find some other users' github handles, or use the list found at the
-    bottom of the page. Get at least 5 different Github usernames and add them as
-    Individual strings to the friendsArray below.
+//structure, definitions, style and creation of each card. 
+const cardMaker = ( {avatar_url, name, login, location, html_url, followers, following, bio} ) => { //destructured object data. a single object entered as parameter but only these key value pairs are being used so they do not need to be further specified later. 
+  const card = document.createElement('div')
+  const profilePic = document.createElement('img')
+  const cardInfo = document.createElement('div')
+  const realName = document.createElement('h3')
+  const username = document.createElement('p')
+  const profileLocation = document.createElement('p')
+  const profileInfo = document.createElement('p')
+  const profileText = document.createElement('span')
+  const profileURL = document.createElement('a')
+  const profileFollowers = document.createElement('p')
+  const profileFollowing = document.createElement('p')
+  const profileBio = document.createElement('p')
 
-    Using that array, iterate over it, requesting data for each user, creating a new card for each
-    user, and adding that card to the DOM.
-*/
+  cardBox.appendChild(card)
+  card.appendChild(profilePic)
+  card.appendChild(cardInfo)
+  cardInfo.appendChild(realName)
+  cardInfo.appendChild(username)
+  cardInfo.appendChild(profileLocation)
+  cardInfo.appendChild(profileInfo)
+  profileInfo.appendChild(profileText)
+  profileInfo.appendChild(profileURL)
+  cardInfo.appendChild(profileFollowers)
+  cardInfo.appendChild(profileFollowing)
+  cardInfo.appendChild(profileBio)
 
-const followersArray = [];
-
-/*
-  STEP 3: Create a function that accepts a single object as its only argument.
-    Using DOM methods and properties, create and return the following markup:
-
-    <div class="card">
-      <img src={image url of user} />
-      <div class="card-info">
-        <h3 class="name">{users name}</h3>
-        <p class="username">{users user name}</p>
-        <p>Location: {users location}</p>
-        <p>Profile:
-          <a href={address to users github page}>{address to users github page}</a>
-        </p>
-        <p>Followers: {users followers count}</p>
-        <p>Following: {users following count}</p>
-        <p>Bio: {users bio}</p>
-      </div>
-    </div>
-*/
-
-/*
-  List of LS Instructors Github username's:
-    tetondan
-    dustinmyers
-    justsml
-    luishrd
-    bigknell
-*/
+  card.classList.add('card')
+  cardInfo.classList.add('card-info')
+  realName.classList.add('name')
+  username.classList.add('username')
+  
+  profilePic.src = avatar_url
+  realName.textContent = name
+  username.textContent = login
+  profileLocation.textContent = location
+  profileText.textContent = 'Profile: '
+  profileURL.href = html_url
+  profileURL.alt = `${name}'s Github profile`
+  profileURL.textContent = html_url
+  profileFollowers.textContent = `Followers: ${followers}`
+  profileFollowing.textContent = `Following: ${following}`
+  profileBio.textContent = bio
+}
