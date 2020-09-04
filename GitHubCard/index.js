@@ -9,9 +9,6 @@ axios.get('https://api.github.com/users/kristapants')
       .then(friendList => { //follower list is now known at friendList
         addFriends(friendList.data) //invokes addfriends function that makes friend cards using the data in friendList 
       })
-      .catch(err => { //why bother
-        console.log(err)
-      })
   })
   .catch(err => { //big boss bother
     console.log(err)
@@ -33,7 +30,7 @@ const addFriends = (friendList) => { //declaring a function called addFriends th
 //Defines the container for all cards to have children appended to it. 
 const cardBox = document.querySelector('.cards') //the div that all the user cards need to go into
 
-//structure, definitions, style and creation of each card. 
+//structure, definitions, style and creation of each card.
 const cardMaker = ( {avatar_url, name, login, location, html_url, followers, following, bio} ) => { //destructured object data. a single object entered as parameter but only these key value pairs are being used so they do not need to be further specified later. 
   const card = document.createElement('div')
   const profilePic = document.createElement('img')
@@ -47,6 +44,8 @@ const cardMaker = ( {avatar_url, name, login, location, html_url, followers, fol
   const profileFollowers = document.createElement('p')
   const profileFollowing = document.createElement('p')
   const profileBio = document.createElement('p')
+  const gitContributions = document.createElement('img')
+  const contributionsContainer = document.createElement('div')
 
   cardBox.appendChild(card)
   card.appendChild(profilePic)
@@ -60,11 +59,15 @@ const cardMaker = ( {avatar_url, name, login, location, html_url, followers, fol
   cardInfo.appendChild(profileFollowers)
   cardInfo.appendChild(profileFollowing)
   cardInfo.appendChild(profileBio)
+  card.appendChild(contributionsContainer)
+  contributionsContainer.appendChild(gitContributions)
 
   card.classList.add('card')
+  profilePic.classList.add('profile-pic')
   cardInfo.classList.add('card-info')
   realName.classList.add('name')
   username.classList.add('username')
+  gitContributions.classList.add('gitContributions')
   
   profilePic.src = avatar_url
   realName.textContent = name
@@ -77,4 +80,5 @@ const cardMaker = ( {avatar_url, name, login, location, html_url, followers, fol
   profileFollowers.textContent = `Followers: ${followers}`
   profileFollowing.textContent = `Following: ${following}`
   profileBio.textContent = bio
+  gitContributions.src = `https://ghchart.rshah.org/${login}`
 }
